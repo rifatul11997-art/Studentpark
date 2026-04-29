@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Park – Online Academic Store</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #161a23;
+    --surface2: #1e2330;
+    --border: #2a3045;
+    --accent: #f5a623;
+    --accent2: #3ecf8e;
+    --accent3: #7c6fff;
+    --text: #e8eaf0;
+    --muted: #7a8099;
+    --danger: #ef5350;
+    --white: #ffffff;
+    --radius: 14px;
+    --shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+  h1,h2,h3{font-family:'Playfair Display',serif}
+  button{cursor:pointer;font-family:'DM Sans',sans-serif}
+  input,select,textarea{font-family:'DM Sans',sans-serif}
+
+  /* OVERLAY */
+  .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:999;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+  .overlay.active{display:flex}
+
+  /* MODAL */
+  .modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:36px 32px;width:100%;max-width:480px;position:relative;max-height:90vh;overflow-y:auto;animation:slideUp .3s ease}
+  @keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+  .modal h2{font-size:1.8rem;margin-bottom:6px;color:var(--accent)}
+  .modal p.sub{color:var(--muted);font-size:.9rem;margin-bottom:24px}
+  .close-btn{position:absolute;top:14px;right:16px;background:none;border:none;color:var(--muted);font-size:1.4rem;line-height:1;transition:color .2s}
+  .close-btn:hover{color:var(--danger)}
+  .form-group{margin-bottom:16px}
+  .form-group label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:6px;font-weight:500}
+  .form-group input,.form-group select,.form-group textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:.95rem;outline:none;transition:border-color .2s}
+  .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--accent)}
+  .form-group textarea{resize:vertical;min-height:80px}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:8px;font-weight:600;font-size:.9rem;border:none;transition:all .2s}
+  .btn-primary{background:var(--accent);color:#000}
+  .btn-primary:hover{background:#e09520;transform:translateY(-1px)}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+  .btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
+  .btn-danger{background:var(--danger);color:#fff}
+  .btn-danger:hover{background:#c62828}
+  .btn-success{background:var(--accent2);color:#000}
+  .btn-success:hover{background:#2ea574}
+  .btn-full{width:100%;justify-content:center}
+  .tab-row{display:flex;gap:4px;margin-bottom:24px;background:var(--surface2);border-radius:8px;padding:4px}
+  .tab-btn{flex:1;padding:8px;border:none;border-radius:6px;background:none;color:var(--muted);font-weight:600;font-size:.85rem;transition:all .2s}
+  .tab-btn.active{background:var(--accent);color:#000}
+  .divider{text-align:center;color:var(--muted);font-size:.82rem;margin:16px 0;position:relative}
+  .divider::before,.divider::after{content:'';position:absolute;top:50%;width:42%;height:1px;background:var(--border)}
+  .divider::before{left:0}.divider::after{right:0}
+  .photo-upload{border:2px dashed var(--border);border-radius:8px;padding:20px;text-align:center;cursor:pointer;transition:border-color .2s;color:var(--muted);font-size:.88rem}
+  .photo-upload:hover{border-color:var(--accent)}
+  .photo-upload input{display:none}
+
+  /* LANDING */
+  #landing{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:40px 20px;background:radial-gradient(ellipse at 50% 0%,#1e2a40 0%,var(--bg) 70%)}
+  #landing h1{font-size:clamp(2.5rem,6vw,4.5rem);line-height:1.1;margin-bottom:16px}
+  #landing h1 span{color:var(--accent)}
+  #landing p{color:var(--muted);font-size:1.1rem;max-width:500px;margin-bottom:40px}
+  .landing-btns{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+
+  /* MAIN APP */
+  #app{display:none;min-height:100vh}
+
+  /* NAVBAR */
+  nav{position:sticky;top:0;z-index:100;background:rgba(13,15,20,.95);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between}
+  .nav-logo{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--accent);font-weight:900}
+  .nav-logo span{color:var(--text)}
+  .nav-actions{display:flex;align-items:center;gap:12px}
+  .nav-btn{background:none;border:1px solid var(--border);color:var(--text);padding:7px 14px;border-radius:8px;font-size:.85rem;font-weight:500;transition:all .2s}
+  .nav-btn:hover,.nav-btn.active{border-color:var(--accent);color:var(--accent)}
+  .cart-btn{position:relative}
+  .cart-badge{position:absolute;top:-6px;right:-6px;background:var(--danger);color:#fff;border-radius:50%;width:18px;height:18px;font-size:.65rem;display:flex;align-items:center;justify-content:center;font-weight:700}
+
+  /* HERO */
+  .hero{background:linear-gradient(135deg,#0d0f14 0%,#1a1f2e 50%,#0d0f14 100%);padding:60px 24px;text-align:center;border-bottom:1px solid var(--border)}
+  .hero h2{font-size:clamp(2rem,4vw,3rem);margin-bottom:12px}
+  .hero h2 span{color:var(--accent)}
+  .hero p{color:var(--muted);max-width:600px;margin:0 auto 28px}
+  .search-bar{display:flex;max-width:540px;margin:0 auto;gap:0}
+  .search-bar input{flex:1;background:var(--surface);border:1px solid var(--border);border-right:none;border-radius:8px 0 0 8px;padding:12px 16px;color:var(--text);font-size:.95rem;outline:none}
+  .search-bar input:focus{border-color:var(--accent)}
+  .search-bar button{background:var(--accent);border:none;color:#000;padding:0 20px;border-radius:0 8px 8px 0;font-weight:700}
+
+  /* CATEGORIES */
+  .section{padding:28px 24px}
+  .section-title{font-size:1.3rem;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+  .section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+  .cat-scroll{display:flex;gap:10px;overflow-x:auto;padding-bottom:8px;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+  .cat-chip{flex-shrink:0;padding:8px 16px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:.85rem;font-weight:500;cursor:pointer;transition:all .2s;white-space:nowrap}
+  .cat-chip:hover,.cat-chip.active{background:var(--accent);border-color:var(--accent);color:#000}
+
+  /* PRODUCTS */
+  .products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:18px}
+  .product-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:transform .2s,box-shadow .2s;cursor:pointer}
+  .product-card:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+  .product-img{width:100%;height:160px;object-fit:cover;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:3rem;user-select:none}
+  .product-info{padding:14px}
+  .product-category{font-size:.72rem;color:var(--accent);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+  .product-name{font-weight:600;font-size:.95rem;margin-bottom:4px;line-height:1.3}
+  .product-price{font-family:'JetBrains Mono',monospace;color:var(--accent2);font-size:1rem;font-weight:600;margin-bottom:12px}
+  .product-rating{font-size:.8rem;color:var(--muted);margin-bottom:10px}
+  .product-rating span{color:#f5a623}
+  .add-cart-btn{width:100%;padding:8px;border:none;background:var(--accent);color:#000;border-radius:6px;font-weight:700;font-size:.85rem;transition:all .2s}
+  .add-cart-btn:hover{background:#e09520}
+
+  /* PRODUCT DETAIL */
+  .product-detail-modal{max-width:700px}
+  .pd-img{width:100%;height:240px;background:var(--surface2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:5rem;margin-bottom:20px}
+  .pd-meta{display:flex;gap:20px;flex-wrap:wrap;margin-bottom:16px}
+  .pd-meta span{font-size:.85rem;color:var(--muted)}
+  .pd-meta strong{color:var(--accent)}
+  .stars{display:flex;gap:4px;margin:8px 0}
+  .star{font-size:1.5rem;cursor:pointer;transition:transform .1s}
+  .star:hover{transform:scale(1.2)}
+  .comments-list{max-height:200px;overflow-y:auto;margin-bottom:12px}
+  .comment-item{background:var(--surface2);border-radius:8px;padding:10px 14px;margin-bottom:8px}
+  .comment-item .c-name{font-weight:600;font-size:.85rem;color:var(--accent);margin-bottom:2px}
+  .comment-item .c-text{font-size:.88rem;color:var(--text)}
+  .like-dislike{display:flex;gap:10px;margin:12px 0}
+  .ld-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 14px;border-radius:20px;font-size:.85rem;transition:all .2s}
+  .ld-btn:hover{border-color:var(--accent);color:var(--accent)}
+  .ld-btn.liked{background:var(--accent2);border-color:var(--accent2);color:#000}
+  .ld-btn.disliked{background:var(--danger);border-color:var(--danger);color:#fff}
+
+  /* CART */
+  .cart-modal{max-width:560px}
+  .cart-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+  .cart-item-img{width:56px;height:56px;background:var(--surface2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0}
+  .cart-item-info{flex:1}
+  .cart-item-name{font-weight:600;font-size:.9rem;margin-bottom:2px}
+  .cart-item-price{color:var(--accent2);font-family:'JetBrains Mono',monospace;font-size:.9rem}
+  .cart-item-remove{background:none;border:none;color:var(--muted);font-size:1.1rem;transition:color .2s}
+  .cart-item-remove:hover{color:var(--danger)}
+  .cart-total{display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-top:1px solid var(--border);font-weight:700;font-size:1.1rem}
+  .cart-total span{color:var(--accent);font-family:'JetBrains Mono',monospace}
+
+  /* CHECKOUT */
+  .checkout-modal{max-width:600px}
+  .delivery-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .payment-options{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
+  .pay-option{border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;cursor:pointer;transition:all .2s}
+  .pay-option:hover,.pay-option.selected{border-color:var(--accent);background:rgba(245,166,35,.08)}
+  .pay-option .pay-icon{font-size:1.6rem;margin-bottom:4px}
+  .pay-option .pay-name{font-size:.82rem;font-weight:600}
+  .tracking-bar{background:var(--surface2);border-radius:10px;padding:16px;margin:16px 0}
+  .track-steps{display:flex;justify-content:space-between;position:relative;margin-top:12px}
+  .track-steps::before{content:'';position:absolute;top:14px;left:0;right:0;height:2px;background:var(--border);z-index:0}
+  .track-step{display:flex;flex-direction:column;align-items:center;gap:6px;z-index:1}
+  .track-dot{width:28px;height:28px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.75rem;transition:all .3s}
+  .track-dot.done{background:var(--accent2);border-color:var(--accent2);color:#000}
+  .track-label{font-size:.7rem;color:var(--muted);text-align:center;max-width:70px}
+
+  /* INVOICE */
+  .invoice-modal{max-width:600px}
+  .invoice-header{text-align:center;padding:16px 0;border-bottom:2px solid var(--accent)}
+  .invoice-header h2{color:var(--accent);margin-bottom:4px}
+  .invoice-table{width:100%;border-collapse:collapse;margin:16px 0;font-size:.88rem}
+  .invoice-table th{background:var(--surface2);padding:10px;text-align:left;border-bottom:1px solid var(--border)}
+  .invoice-table td{padding:10px;border-bottom:1px solid var(--border)}
+  .invoice-total{text-align:right;font-weight:700;font-size:1.1rem;color:var(--accent)}
+
+  /* MESSAGING */
+  .message-modal{max-width:520px}
+  .msg-list{max-height:280px;overflow-y:auto;padding:8px 0;margin-bottom:12px;display:flex;flex-direction:column;gap:10px}
+  .msg-bubble{max-width:75%;padding:10px 14px;border-radius:14px;font-size:.88rem;line-height:1.5}
+  .msg-bubble.sent{align-self:flex-end;background:var(--accent3);color:#fff;border-bottom-right-radius:4px}
+  .msg-bubble.recv{align-self:flex-start;background:var(--surface2);color:var(--text);border-bottom-left-radius:4px}
+  .msg-name{font-size:.72rem;font-weight:600;margin-bottom:3px;color:var(--accent)}
+  .msg-input-row{display:flex;gap:8px;align-items:flex-end}
+  .msg-input-row textarea{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-size:.9rem;outline:none;resize:none;max-height:100px}
+  .msg-input-row textarea:focus{border-color:var(--accent)}
+  .msg-actions{display:flex;gap:6px;margin-bottom:8px}
+  .msg-action-btn{background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:6px 10px;border-radius:6px;font-size:.8rem;transition:all .2s}
+  .msg-action-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+  /* ADMIN PAGE */
+  #admin-page{display:none;min-height:100vh}
+  .admin-header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 28px;display:flex;align-items:center;justify-content:space-between}
+  .admin-header h2{color:var(--accent)}
+  .admin-body{padding:28px}
+  .admin-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:28px}
+  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;text-align:center}
+  .stat-card .s-num{font-size:2rem;font-weight:700;color:var(--accent);font-family:'JetBrains Mono',monospace}
+  .stat-card .s-label{font-size:.85rem;color:var(--muted);margin-top:4px}
+  .admin-action-btns{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:28px}
+  .admin-action-btn{display:flex;flex-direction:column;align-items:center;gap:8px;padding:20px 28px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);font-weight:700;font-size:.9rem;transition:all .25s;min-width:140px}
+  .admin-action-btn .btn-icon{font-size:2rem}
+  .admin-action-btn:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+  .admin-action-btn.add:hover{border-color:var(--accent2);color:var(--accent2)}
+  .admin-action-btn.del:hover{border-color:var(--danger);color:var(--danger)}
+  .admin-action-btn.hist:hover{border-color:var(--accent3);color:var(--accent3)}
+  .admin-products-table{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+  .apt-header{display:grid;grid-template-columns:2fr 1fr 1.5fr 1fr;gap:12px;padding:12px 16px;background:var(--surface2);font-size:.82rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+  .apt-row{display:grid;grid-template-columns:2fr 1fr 1.5fr 1fr;gap:12px;padding:12px 16px;border-top:1px solid var(--border);font-size:.88rem;align-items:center}
+  .apt-row:hover{background:var(--surface2)}
+
+  /* ADD PRODUCT ADMIN MODAL */
+  .add-product-modal{max-width:520px}
+  .ap-cat-select{max-height:140px;overflow-y:auto}
+
+  /* DELETE MODAL */
+  .delete-modal{max-width:580px}
+  .delete-product-item{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:8px;transition:background .15s}
+  .delete-product-item:hover{background:var(--surface2)}
+  .delete-product-item input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent);cursor:pointer;flex-shrink:0}
+  .delete-count{background:var(--surface2);border-radius:8px;padding:10px 16px;margin-bottom:16px;font-size:.9rem;display:flex;justify-content:space-between;align-items:center}
+
+  /* HISTORY MODAL */
+  .history-modal{max-width:680px}
+  .history-item{background:var(--surface2);border-radius:10px;padding:14px 16px;margin-bottom:12px}
+  .history-item-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .history-item-header .order-id{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--muted)}
+  .history-item-header .order-date{font-size:.8rem;color:var(--muted)}
+  .history-customer{font-weight:600;margin-bottom:6px;font-size:.9rem}
+  .history-products{font-size:.85rem;color:var(--muted)}
+  .history-total{color:var(--accent2);font-family:'JetBrains Mono',monospace;font-weight:700;margin-top:6px}
+
+  /* FORGOT PASSWORD */
+  .forgot-modal{max-width:420px}
+
+  /* RESPONSIVE */
+  @media(max-width:600px){
+    .products-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
+    .delivery-grid{grid-template-columns:1fr}
+    .admin-action-btns{flex-direction:column}
+    nav{padding:0 12px}
+  }
+  /* SCROLLBAR */
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+  /* TOAST */
+  #toast{position:fixed;bottom:28px;right:28px;background:var(--accent2);color:#000;padding:12px 20px;border-radius:8px;font-weight:600;font-size:.9rem;z-index:9999;transform:translateY(80px);opacity:0;transition:all .3s}
+  #toast.show{transform:translateY(0);opacity:1}
+
+  /* FORGOT STEP */
+  .step{display:none}.step.active{display:block}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- ===================== LANDING ===================== -->
+<div id="landing">
+  <h1>Student <span>Park</span></h1>
+  <p>Bangladesh's premier online academic store. Books, stationery, and educational supplies at your fingertips.</p>
+  <div class="landing-btns">
+    <button class="btn btn-primary" onclick="showLoginModal('customer')">🎓 Customer Login</button>
+    <button class="btn btn-secondary" onclick="showLoginModal('admin')">⚙️ Admin Login</button>
+  </div>
+</div>
+
+<!-- ===================== MAIN APP ===================== -->
+<div id="app">
+  <nav>
+    <div class="nav-logo">Student<span>Park</span></div>
+    <div class="nav-actions">
+      <span id="nav-username" style="color:var(--muted);font-size:.85rem;margin-right:4px"></span>
+      <button class="nav-btn" onclick="openMessageModal()">💬 Messages</button>
+      <button class="nav-btn cart-btn" onclick="openCartModal()">🛒 Cart <span class="cart-badge" id="cart-count">0</span></button>
+      <button class="nav-btn" onclick="logout()">Sign Out</button>
+    </div>
+  </nav>
+  <div class="hero">
+    <h2>Find Your <span>Academic Edge</span></h2>
+    <p>Explore thousands of books, stationery, and learning tools curated for Bangladeshi students.</p>
+    <div class="search-bar">
+      <input type="text" id="search-input" placeholder="Search books, stationery..." oninput="filterProducts()">
+      <button>🔍</button>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">📚 Categories</div>
+    <div class="cat-scroll" id="cat-scroll"></div>
+  </div>
+  <div class="section">
+    <div class="section-title" id="products-title">📦 All Products</div>
+    <div class="products-grid" id="products-grid"></div>
+  </div>
+</div>
+
+<!-- ===================== ADMIN PAGE ===================== -->
+<div id="admin-page">
+  <div class="admin-header">
+    <h2>⚙️ Admin Dashboard – Student Park</h2>
+    <div style="display:flex;gap:10px;align-items:center">
+      <span id="admin-name" style="color:var(--muted);font-size:.88rem"></span>
+      <button class="btn btn-secondary" onclick="logout()">Sign Out</button>
+    </div>
+  </div>
+  <div class="admin-body">
+    <div class="admin-stats">
+      <div class="stat-card"><div class="s-num" id="stat-products">0</div><div class="s-label">Total Products</div></div>
+      <div class="stat-card"><div class="s-num" id="stat-orders">0</div><div class="s-label">Total Orders</div></div>
+      <div class="stat-card"><div class="s-num" id="stat-revenue">৳0</div><div class="s-label">Total Revenue</div></div>
+      <div class="stat-card"><div class="s-num" id="stat-cats">20</div><div class="s-label">Categories</div></div>
+    </div>
+    <div class="admin-action-btns">
+      <button class="admin-action-btn add" onclick="openAddProductModal()"><span class="btn-icon">➕</span>Add New Product</button>
+      <button class="admin-action-btn del" onclick="openDeleteModal()"><span class="btn-icon">🗑️</span>Delete Product</button>
+      <button class="admin-action-btn hist" onclick="openHistoryModal()"><span class="btn-icon">📜</span>Sell History</button>
+    </div>
+    <div class="section-title" style="margin-bottom:14px">🗂️ All Products</div>
+    <div class="admin-products-table">
+      <div class="apt-header">
+        <div>Product Name</div><div>Price</div><div>Category</div><div>Action</div>
+      </div>
+      <div id="admin-products-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== OVERLAYS / MODALS ===================== -->
+
+<!-- LOGIN OVERLAY -->
+<div class="overlay" id="login-overlay">
+  <div class="modal" id="login-modal">
+    <button class="close-btn" onclick="closeOverlay('login-overlay')">✕</button>
+    <h2 id="login-title">Customer Login</h2>
+    <p class="sub" id="login-sub">Welcome back! Sign in or create an account.</p>
+    <div class="tab-row">
+      <button class="tab-btn active" id="tab-signin" onclick="switchLoginTab('signin')">Sign In</button>
+      <button class="tab-btn" id="tab-signup" onclick="switchLoginTab('signup')">Sign Up</button>
+    </div>
+    <!-- SIGNIN -->
+    <div id="signin-form">
+      <div id="admin-pass-group" class="form-group" style="display:none">
+        <label>Admin Access Password</label>
+        <input type="password" id="admin-key-input" placeholder="Enter admin password">
+      </div>
+      <div class="form-group"><label>Email</label><input type="email" id="signin-email" placeholder="your@email.com"></div>
+      <div class="form-group"><label>Password</label><input type="password" id="signin-password" placeholder="Password"></div>
+      <button class="btn btn-primary btn-full" onclick="doSignIn()" style="margin-bottom:10px">Sign In</button>
+      <button style="background:none;border:none;color:var(--muted);font-size:.85rem;cursor:pointer;width:100%;text-align:center" onclick="openForgot()">Forgot Password?</button>
+    </div>
+    <!-- SIGNUP -->
+    <div id="signup-form" style="display:none">
+      <div class="form-group">
+        <label>Profile Photo (optional)</label>
+        <label class="photo-upload">
+          <input type="file" id="signup-photo" accept="image/*" onchange="previewPhoto(this)">
+          <div id="photo-preview">📷 Click to upload photo</div>
+        </label>
+      </div>
+      <div class="form-group"><label>Full Name</label><input type="text" id="signup-name" placeholder="Your full name"></div>
+      <div class="form-group"><label>Email</label><input type="email" id="signup-email" placeholder="your@email.com"></div>
+      <div class="form-group"><label>Phone</label><input type="text" id="signup-phone" placeholder="01XXXXXXXXX"></div>
+      <div class="form-group"><label>Password</label><input type="password" id="signup-password" placeholder="Create a password"></div>
+      <div class="form-group"><label>Confirm Password</label><input type="password" id="signup-confirm" placeholder="Repeat password"></div>
+      <button class="btn btn-primary btn-full" onclick="doSignUp()">Sign Up</button>
+    </div>
+  </div>
+</div>
+
+<!-- FORGOT PASSWORD OVERLAY -->
+<div class="overlay" id="forgot-overlay">
+  <div class="modal forgot-modal">
+    <button class="close-btn" onclick="closeOverlay('forgot-overlay')">✕</button>
+    <h2>Forgot Password</h2><p class="sub">Reset your password via email.</p>
+    <div class="step active" id="forgot-step1">
+      <div class="form-group"><label>Enter your email</label><input type="email" id="forgot-email" placeholder="your@email.com"></div>
+      <button class="btn btn-primary btn-full" onclick="sendResetCode()">Send Reset Code</button>
+    </div>
+    <div class="step" id="forgot-step2">
+      <div class="form-group"><label>Enter the 6-digit code sent to your email</label><input type="text" id="reset-code-input" placeholder="e.g. 123456" maxlength="6"></div>
+      <button class="btn btn-primary btn-full" onclick="verifyCode()">Verify Code</button>
+    </div>
+    <div class="step" id="forgot-step3">
+      <div class="form-group"><label>New Password</label><input type="password" id="new-password" placeholder="New password"></div>
+      <div class="form-group"><label>Confirm New Password</label><input type="password" id="confirm-new-password" placeholder="Confirm new password"></div>
+      <button class="btn btn-primary btn-full" onclick="resetPassword()">Reset Password</button>
+    </div>
+  </div>
+</div>
+
+<!-- PRODUCT DETAIL OVERLAY -->
+<div class="overlay" id="product-detail-overlay">
+  <div class="modal product-detail-modal" id="product-detail-modal">
+    <button class="close-btn" onclick="closeOverlay('product-detail-overlay')">✕</button>
+    <div id="pd-content"></div>
+  </div>
+</div>
+
+<!-- CART OVERLAY -->
+<div class="overlay" id="cart-overlay">
+  <div class="modal cart-modal">
+    <button class="close-btn" onclick="closeOverlay('cart-overlay')">✕</button>
+    <h2>🛒 Shopping Cart</h2><p class="sub">Your selected items</p>
+    <div id="cart-items-list"></div>
+    <div class="cart-total">Total <span id="cart-total-price">৳0</span></div>
+    <button class="btn btn-primary btn-full" onclick="openCheckout()" style="margin-top:8px">Proceed to Checkout</button>
+  </div>
+</div>
+
+<!-- CHECKOUT OVERLAY -->
+<div class="overlay" id="checkout-overlay">
+  <div class="modal checkout-modal">
+    <button class="close-btn" onclick="closeOverlay('checkout-overlay')">✕</button>
+    <h2>📦 Checkout</h2><p class="sub">Complete your order</p>
+    <div class="section-title" style="font-size:1rem;margin-bottom:12px">📍 Delivery Location</div>
+    <div class="delivery-grid">
+      <div class="form-group"><label>Division</label>
+        <select id="del-division"><option>Dhaka</option><option>Chittagong</option><option>Rajshahi</option><option>Khulna</option><option>Sylhet</option><option>Barisal</option><option>Rangpur</option><option>Mymensingh</option></select>
+      </div>
+      <div class="form-group"><label>District</label><input type="text" id="del-district" placeholder="e.g. Dhaka"></div>
+      <div class="form-group"><label>Thana / Upazila</label><input type="text" id="del-thana" placeholder="e.g. Mirpur"></div>
+      <div class="form-group"><label>Village / Area</label><input type="text" id="del-village" placeholder="e.g. Pallabi"></div>
+    </div>
+    <div class="form-group"><label>House Number & Road</label><input type="text" id="del-house" placeholder="House #12, Road #3"></div>
+    <div class="form-group"><label>Phone Number</label><input type="text" id="del-phone" placeholder="01XXXXXXXXX"></div>
+    <div class="form-group"><label>Google Maps Link (optional)</label><input type="text" id="del-map" placeholder="https://maps.google.com/..."></div>
+    <div class="tracking-bar">
+      <div style="font-weight:600;font-size:.9rem;margin-bottom:4px">🚚 Estimated Delivery Time: <span style="color:var(--accent)">3–5 Business Days</span></div>
+      <div class="track-steps">
+        <div class="track-step"><div class="track-dot done">✓</div><div class="track-label">Order Placed</div></div>
+        <div class="track-step"><div class="track-dot">📦</div><div class="track-label">Processing</div></div>
+        <div class="track-step"><div class="track-dot">🚛</div><div class="track-label">Shipped</div></div>
+        <div class="track-step"><div class="track-dot">🏠</div><div class="track-label">Delivered</div></div>
+      </div>
+    </div>
+    <div class="section-title" style="font-size:1rem;margin-bottom:12px">💳 Payment Method</div>
+    <div class="payment-options" id="payment-options">
+      <div class="pay-option selected" onclick="selectPayment(this,'Cash on Delivery')"><div class="pay-icon">💵</div><div class="pay-name">Cash on Delivery</div></div>
+      <div class="pay-option" onclick="selectPayment(this,'bKash')"><div class="pay-icon">📱</div><div class="pay-name">bKash</div></div>
+      <div class="pay-option" onclick="selectPayment(this,'Nagad')"><div class="pay-icon">💳</div><div class="pay-name">Nagad</div></div>
+      <div class="pay-option" onclick="selectPayment(this,'Bank Transfer')"><div class="pay-icon">🏦</div><div class="pay-name">Bank Transfer</div></div>
+    </div>
+    <button class="btn btn-success btn-full" onclick="confirmOrder()">✅ Confirm Order</button>
+  </div>
+</div>
+
+<!-- INVOICE OVERLAY -->
+<div class="overlay" id="invoice-overlay">
+  <div class="modal invoice-modal">
+    <button class="close-btn" onclick="closeOverlay('invoice-overlay')">✕</button>
+    <div id="invoice-content"></div>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn btn-secondary" onclick="printInvoice()">🖨️ Print Invoice</button>
+      <button class="btn btn-primary" onclick="emailInvoice()">📧 Email Invoice</button>
+    </div>
+  </div>
+</div>
+
+<!-- MESSAGE OVERLAY -->
+<div class="overlay" id="message-overlay">
+  <div class="modal message-modal">
+    <button class="close-btn" onclick="closeOverlay('message-overlay')">✕</button>
+    <h2>💬 Messages</h2><p class="sub" id="msg-subtitle">Chat with the store</p>
+    <div class="msg-list" id="msg-list"></div>
+    <div class="msg-actions">
+      <label class="msg-action-btn" style="cursor:pointer">📷 Photo<input type="file" accept="image/*" style="display:none" onchange="sendImageMsg(this)"></label>
+      <button class="msg-action-btn" onclick="sendVoiceMsg()">🎤 Voice</button>
+    </div>
+    <div class="msg-input-row">
+      <textarea id="msg-input" placeholder="Type a message..." rows="2" onkeydown="msgEnter(event)"></textarea>
+      <button class="btn btn-primary" onclick="sendMsg()">Send</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD PRODUCT (ADMIN) -->
+<div class="overlay" id="add-product-overlay">
+  <div class="modal add-product-modal">
+    <button class="close-btn" onclick="closeOverlay('add-product-overlay')">✕</button>
+    <h2>➕ Add New Product</h2><p class="sub">Fill in the details below.</p>
+    <div class="form-group"><label>Product Name</label><input type="text" id="np-name" placeholder="e.g. HSC Physics Guide"></div>
+    <div class="form-group"><label>Price (৳)</label><input type="number" id="np-price" placeholder="e.g. 250"></div>
+    <div class="form-group"><label>Description</label><textarea id="np-desc" placeholder="Short product description..."></textarea></div>
+    <div class="form-group"><label>Product Category (scroll to select)</label>
+      <select id="np-category" size="5" class="ap-cat-select" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:4px"></select>
+    </div>
+    <div class="form-group"><label>Emoji Icon</label><input type="text" id="np-icon" placeholder="e.g. 📗" maxlength="4" value="📦"></div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button class="btn btn-success" onclick="addProduct()">✅ Done</button>
+      <button class="btn btn-secondary" onclick="refreshAddProduct()">🔄 Refresh</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE PRODUCTS (ADMIN) -->
+<div class="overlay" id="delete-overlay">
+  <div class="modal delete-modal">
+    <button class="close-btn" onclick="closeOverlay('delete-overlay')">✕</button>
+    <h2>🗑️ Delete Products</h2><p class="sub">Select products to remove.</p>
+    <div class="delete-count" id="delete-count-bar">
+      <span>Selected: <strong id="selected-count">0</strong> products</span>
+      <button class="btn btn-secondary" style="padding:5px 12px;font-size:.8rem" onclick="clearSelection()">Clear Selection</button>
+    </div>
+    <div id="delete-products-list" style="max-height:340px;overflow-y:auto"></div>
+    <button class="btn btn-danger btn-full" style="margin-top:14px" onclick="deleteSelected()">🗑️ Delete Selected</button>
+  </div>
+</div>
+
+<!-- SELL HISTORY (ADMIN) -->
+<div class="overlay" id="history-overlay">
+  <div class="modal history-modal">
+    <button class="close-btn" onclick="closeOverlay('history-overlay')">✕</button>
+    <h2>📜 Sell History</h2><p class="sub">All completed orders.</p>
+    <div id="history-list" style="max-height:480px;overflow-y:auto"></div>
+  </div>
+</div>
+
+<script>
+// ============================
+// DATABASE (localStorage)
+// ============================
+const DB = {
+  get: (k, d=[]) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
+  set: (k, v) => localStorage.setItem(k, JSON.stringify(v)),
+};
+
+const CATEGORIES = [
+  "Academic Textbooks & Guides (SSC, HSC, University)",
+  "Islamic Books & Literature",
+  "Bangla Literature & Novels (Fiction)",
+  "Children's Books & Rhymes",
+  "Stationery Items (Pens, Pencils, Erasers)",
+  "Non-Fiction & Self-Help Books",
+  "Office Supplies & Stationery (Files, Folders, Staplers)",
+  "Art & Drawing Materials (Sketchbooks, Paints, Brushes)",
+  "West Bengal Publications (Translated/Imported)",
+  "Career & Skill Development Books",
+  "Competitive Exam Preparation (BCS, Bank, NTRCA)",
+  "Graphic Novels & Comics",
+  "Computer & Technology Books",
+  "General Knowledge & Encyclopedia",
+  "Magazines & Periodicals",
+  "Educational Toys & Puzzles",
+  "Notebooks & Journals",
+  "Biography & Autobiography",
+  "Language Learning Books & Dictionaries",
+  "Geometry Boxes & Mathematical Tools"
+];
+
+const CAT_ICONS = ["📚","☪️","📖","🧒","✏️","💡","📁","🎨","📗","🚀","📝","🎭","💻","🌍","📰","🧩","📓","👤","🗣️","📐"];
+
+const SAMPLE_PRODUCTS = [
+  {id:1,name:"HSC Physics (1st Paper)",price:320,desc:"Comprehensive guide for HSC Physics covering all chapters.",category:"Academic Textbooks & Guides (SSC, HSC, University)",icon:"📚",ratings:[4,5,4],comments:[{user:"Rahim",text:"Very helpful for board exam prep!"}],likes:12,dislikes:1},
+  {id:2,name:"Quran Majeed (Pocket)",price:250,desc:"Pocket-sized Quran with Bengali translation.",category:"Islamic Books & Literature",icon:"☪️",ratings:[5,5],comments:[],likes:30,dislikes:0},
+  {id:3,name:"Humayun Ahmed – Himu",price:180,desc:"Classic Bangla fiction by Humayun Ahmed.",category:"Bangla Literature & Novels (Fiction)",icon:"📖",ratings:[5,4,5,4],comments:[{user:"Sumaiya",text:"Must read!"}],likes:45,dislikes:2},
+  {id:4,name:"Colorful Rhyme Book",price:120,desc:"Illustrated rhyme book for young children.",category:"Children's Books & Rhymes",icon:"🧒",ratings:[5],comments:[],likes:8,dislikes:0},
+  {id:5,name:"Pilot Ballpoint Pens (12pcs)",price:95,desc:"Smooth writing pilot ballpoint pens.",category:"Stationery Items (Pens, Pencils, Erasers)",icon:"✏️",ratings:[4,3],comments:[],likes:5,dislikes:1},
+  {id:6,name:"The 7 Habits – Bangla",price:300,desc:"Bangla translation of the bestselling self-help book.",category:"Non-Fiction & Self-Help Books",icon:"💡",ratings:[5,4],comments:[{user:"Karim",text:"Life changing book!"}],likes:22,dislikes:0},
+  {id:7,name:"A4 Document File (10pcs)",price:150,desc:"Durable polypropylene document files.",category:"Office Supplies & Stationery (Files, Folders, Staplers)",icon:"📁",ratings:[3,4],comments:[],likes:3,dislikes:0},
+  {id:8,name:"Sketchbook A4 – 80 Pages",price:200,desc:"High-quality sketchbook for artists.",category:"Art & Drawing Materials (Sketchbooks, Paints, Brushes)",icon:"🎨",ratings:[5,5,4],comments:[],likes:11,dislikes:0},
+  {id:9,name:"Rabindranath Tagore Collection",price:450,desc:"West Bengal translated collection of Tagore poems.",category:"West Bengal Publications (Translated/Imported)",icon:"📗",ratings:[5],comments:[],likes:19,dislikes:1},
+  {id:10,name:"BCS Preliminary Guide",price:380,desc:"Complete BCS preparation guide with model tests.",category:"Competitive Exam Preparation (BCS, Bank, NTRCA)",icon:"📝",ratings:[4,4,5],comments:[{user:"Nabil",text:"Best BCS book!"}],likes:60,dislikes:3},
+  {id:11,name:"Dragon Ball Z Vol.1",price:220,desc:"Classic manga series translated to Bangla.",category:"Graphic Novels & Comics",icon:"🎭",ratings:[5,5],comments:[],likes:27,dislikes:0},
+  {id:12,name:"Python Programming (Bangla)",price:350,desc:"Learn Python from scratch in Bangla.",category:"Computer & Technology Books",icon:"💻",ratings:[4,5],comments:[{user:"Farhan",text:"Perfect for beginners!"}],likes:33,dislikes:1},
+];
+
+function initDB() {
+  if (!DB.get('products', null)) DB.set('products', SAMPLE_PRODUCTS);
+  if (!DB.get('users', null)) DB.set('users', []);
+  if (!DB.get('orders', null)) DB.set('orders', []);
+  if (!DB.get('messages', null)) DB.set('messages', []);
+  if (!DB.get('admin-pass', null)) DB.set('admin-pass', 'rifat1234');
+  if (!DB.get('next-id', null)) DB.set('next-id', 100);
+}
+initDB();
+
+// ============================
+// STATE
+// ============================
+let currentUser = null;
+let currentRole = null; // 'customer' | 'admin'
+let loginType = 'customer';
+let cart = [];
+let selectedPayment = 'Cash on Delivery';
+let selectedCategory = 'All';
+let resetCode = '';
+let resetEmail = '';
+
+// ============================
+// UTILITIES
+// ============================
+function toast(msg, color='var(--accent2)') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.background = color;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+function closeOverlay(id) { document.getElementById(id).classList.remove('active'); }
+function openOverlay(id) { document.getElementById(id).classList.add('active'); }
+
+// ============================
+// AUTH
+// ============================
+function showLoginModal(type) {
+  loginType = type;
+  document.getElementById('login-title').textContent = type === 'admin' ? 'Admin Login' : 'Customer Login';
+  document.getElementById('login-sub').textContent = type === 'admin' ? 'Admin access requires a special password.' : 'Welcome back!';
+  document.getElementById('admin-pass-group').style.display = type === 'admin' ? '' : 'none';
+  switchLoginTab('signin');
+  openOverlay('login-overlay');
+}
+function switchLoginTab(tab) {
+  document.getElementById('signin-form').style.display = tab === 'signin' ? '' : 'none';
+  document.getElementById('signup-form').style.display = tab === 'signup' ? '' : 'none';
+  document.getElementById('tab-signin').classList.toggle('active', tab === 'signin');
+  document.getElementById('tab-signup').classList.toggle('active', tab === 'signup');
+}
+function previewPhoto(input) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = e => document.getElementById('photo-preview').innerHTML = `<img src="${e.target.result}" style="max-height:80px;border-radius:8px">`;
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+function doSignIn() {
+  const email = document.getElementById('signin-email').value.trim();
+  const pass = document.getElementById('signin-password').value;
+  if (!email || !pass) { toast('Please fill all fields', 'var(--danger)'); return; }
+  if (loginType === 'admin') {
+    const key = document.getElementById('admin-key-input').value;
+    if (key !== DB.get('admin-pass', 'rifat1234')) { toast('Wrong admin password!', 'var(--danger)'); return; }
+    currentUser = {name:'Admin',email};
+    currentRole = 'admin';
+    closeOverlay('login-overlay');
+    showAdminPage();
+    return;
+  }
+  const users = DB.get('users', []);
+  const user = users.find(u => u.email === email && u.password === pass);
+  if (!user) { toast('Invalid credentials!', 'var(--danger)'); return; }
+  currentUser = user; currentRole = 'customer';
+  closeOverlay('login-overlay');
+  showCustomerApp();
+}
+function doSignUp() {
+  const name = document.getElementById('signup-name').value.trim();
+  const email = document.getElementById('signup-email').value.trim();
+  const phone = document.getElementById('signup-phone').value.trim();
+  const pass = document.getElementById('signup-password').value;
+  const conf = document.getElementById('signup-confirm').value;
+  if (!name || !email || !pass) { toast('Please fill required fields', 'var(--danger)'); return; }
+  if (pass !== conf) { toast('Passwords do not match!', 'var(--danger)'); return; }
+  const users = DB.get('users', []);
+  if (users.find(u => u.email === email)) { toast('Email already registered!', 'var(--danger)'); return; }
+  const newUser = {id: Date.now(), name, email, phone, password: pass, photo: null};
+  users.push(newUser); DB.set('users', users);
+  currentUser = newUser; currentRole = 'customer';
+  closeOverlay('login-overlay');
+  showCustomerApp();
+  toast(`Welcome, ${name}! 🎉`);
+}
+function logout() {
+  currentUser = null; currentRole = null; cart = [];
+  updateCartBadge();
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('admin-page').style.display = 'none';
+  document.getElementById('landing').style.display = 'flex';
+}
+
+// ============================
+// FORGOT PASSWORD
+// ============================
+function openForgot() { openOverlay('forgot-overlay'); showStep('forgot-step1'); }
+function showStep(id) {
+  ['forgot-step1','forgot-step2','forgot-step3'].forEach(s => document.getElementById(s).classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function sendResetCode() {
+  resetEmail = document.getElementById('forgot-email').value.trim();
+  if (!resetEmail) { toast('Enter your email', 'var(--danger)'); return; }
+  resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+  toast(`Code sent! (Demo code: ${resetCode})`, 'var(--accent3)');
+  showStep('forgot-step2');
+}
+function verifyCode() {
+  const code = document.getElementById('reset-code-input').value.trim();
+  if (code === resetCode) { showStep('forgot-step3'); toast('Code verified!'); }
+  else toast('Wrong code!', 'var(--danger)');
+}
+function resetPassword() {
+  const np = document.getElementById('new-password').value;
+  const cp = document.getElementById('confirm-new-password').value;
+  if (np !== cp) { toast('Passwords do not match!', 'var(--danger)'); return; }
+  const users = DB.get('users', []);
+  const idx = users.findIndex(u => u.email === resetEmail);
+  if (idx > -1) { users[idx].password = np; DB.set('users', users); }
+  // also update admin pass if it was admin
+  closeOverlay('forgot-overlay'); toast('Password reset successfully!');
+}
+
+// ============================
+// CUSTOMER APP
+// ============================
+function showCustomerApp() {
+  document.getElementById('landing').style.display = 'none';
+  document.getElementById('admin-page').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('nav-username').textContent = `👤 ${currentUser.name}`;
+  renderCategories(); renderProducts();
+}
+function renderCategories() {
+  const el = document.getElementById('cat-scroll');
+  let html = `<span class="cat-chip active" onclick="filterByCategory('All',this)">All</span>`;
+  CATEGORIES.forEach((c, i) => {
+    html += `<span class="cat-chip" onclick="filterByCategory('${c.replace(/'/g,"\\'")}',this)">${CAT_ICONS[i]} ${c.split('(')[0].trim()}</span>`;
+  });
+  el.innerHTML = html;
+}
+function filterByCategory(cat, el) {
+  selectedCategory = cat;
+  document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
+  if (el) el.classList.add('active');
+  document.getElementById('products-title').textContent = cat === 'All' ? '📦 All Products' : `📦 ${cat}`;
+  renderProducts();
+}
+function filterProducts() {
+  renderProducts(document.getElementById('search-input').value.toLowerCase());
+}
+function renderProducts(search = '') {
+  const products = DB.get('products', []);
+  const grid = document.getElementById('products-grid');
+  let filtered = products;
+  if (selectedCategory !== 'All') filtered = filtered.filter(p => p.category === selectedCategory);
+  if (search) filtered = filtered.filter(p => p.name.toLowerCase().includes(search) || p.category.toLowerCase().includes(search));
+  if (!filtered.length) { grid.innerHTML = '<p style="color:var(--muted);padding:20px">No products found.</p>'; return; }
+  grid.innerHTML = filtered.map(p => {
+    const avg = p.ratings && p.ratings.length ? (p.ratings.reduce((a,b)=>a+b,0)/p.ratings.length).toFixed(1) : '–';
+    const stars = p.ratings && p.ratings.length ? '⭐'.repeat(Math.round(avg)) : '☆';
+    return `<div class="product-card" onclick="openProduct(${p.id})">
+      <div class="product-img">${p.icon||'📦'}</div>
+      <div class="product-info">
+        <div class="product-category">${p.category.split('(')[0].trim()}</div>
+        <div class="product-name">${p.name}</div>
+        <div class="product-price">৳${p.price}</div>
+        <div class="product-rating"><span>${stars}</span> ${avg} (${p.ratings?p.ratings.length:0} reviews)</div>
+        <button class="add-cart-btn" onclick="event.stopPropagation();addToCart(${p.id})">🛒 Add to Cart</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function addToCart(id) {
+  const products = DB.get('products', []);
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+  const existing = cart.find(x => x.id === id);
+  if (existing) existing.qty = (existing.qty || 1) + 1;
+  else cart.push({...p, qty: 1});
+  updateCartBadge(); toast(`${p.name} added to cart! 🛒`);
+}
+function updateCartBadge() {
+  const total = cart.reduce((a,b) => a + (b.qty||1), 0);
+  document.getElementById('cart-count').textContent = total;
+}
+
+// ============================
+// PRODUCT DETAIL
+// ============================
+function openProduct(id) {
+  const products = DB.get('products', []);
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+  const avg = p.ratings && p.ratings.length ? (p.ratings.reduce((a,b)=>a+b,0)/p.ratings.length).toFixed(1) : '0';
+  let commentsHtml = p.comments && p.comments.length ? p.comments.map(c => `<div class="comment-item"><div class="c-name">👤 ${c.user}</div><div class="c-text">${c.text}</div></div>`).join('') : '<p style="color:var(--muted);font-size:.85rem">No comments yet.</p>';
+  document.getElementById('pd-content').innerHTML = `
+    <div class="pd-img">${p.icon||'📦'}</div>
+    <div class="product-category">${p.category}</div>
+    <h2 style="font-size:1.5rem;margin-bottom:8px">${p.name}</h2>
+    <div class="pd-meta">
+      <span>Price: <strong>৳${p.price}</strong></span>
+      <span>Rating: <strong>${avg}/5</strong></span>
+      <span>Reviews: <strong>${p.ratings?p.ratings.length:0}</strong></span>
+    </div>
+    <p style="color:var(--muted);font-size:.9rem;margin-bottom:14px">${p.desc}</p>
+    <div class="like-dislike">
+      <button class="ld-btn" id="like-btn-${id}" onclick="likeProduct(${id})">👍 Like (${p.likes||0})</button>
+      <button class="ld-btn" id="dislike-btn-${id}" onclick="dislikeProduct(${id})">👎 Dislike (${p.dislikes||0})</button>
+    </div>
+    <div style="font-weight:600;margin-bottom:6px">Rate this product:</div>
+    <div class="stars" id="stars-${id}">
+      ${[1,2,3,4,5].map(s=>`<span class="star" onclick="rateProduct(${id},${s})" onmouseover="hoverStar(${id},${s})" onmouseout="unhoverStar(${id})">☆</span>`).join('')}
+    </div>
+    <div style="font-weight:600;margin:12px 0 8px">Comments:</div>
+    <div class="comments-list">${commentsHtml}</div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <input type="text" id="comment-input-${id}" placeholder="Add a comment..." style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);outline:none">
+      <button class="btn btn-primary" onclick="addComment(${id})">Post</button>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="addToCart(${id});closeOverlay('product-detail-overlay')">🛒 Add to Cart</button>
+  `;
+  openOverlay('product-detail-overlay');
+}
+function rateProduct(id, rating) {
+  const products = DB.get('products', []);
+  const idx = products.findIndex(p => p.id === id);
+  if (idx < 0) return;
+  if (!products[idx].ratings) products[idx].ratings = [];
+  products[idx].ratings.push(rating);
+  DB.set('products', products);
+  const stars = document.querySelectorAll(`#stars-${id} .star`);
+  stars.forEach((s,i) => s.textContent = i < rating ? '⭐' : '☆');
+  toast(`Rated ${rating} star${rating>1?'s':''}!`);
+}
+function hoverStar(id, n) { document.querySelectorAll(`#stars-${id} .star`).forEach((s,i) => s.textContent = i<n?'⭐':'☆'); }
+function unhoverStar(id) { document.querySelectorAll(`#stars-${id} .star`).forEach(s => s.textContent = '☆'); }
+function likeProduct(id) {
+  const products = DB.get('products', []);
+  const idx = products.findIndex(p => p.id === id);
+  products[idx].likes = (products[idx].likes || 0) + 1;
+  DB.set('products', products);
+  document.getElementById(`like-btn-${id}`).textContent = `👍 Like (${products[idx].likes})`;
+  document.getElementById(`like-btn-${id}`).classList.add('liked');
+  toast('Liked! 👍');
+}
+function dislikeProduct(id) {
+  const products = DB.get('products', []);
+  const idx = products.findIndex(p => p.id === id);
+  products[idx].dislikes = (products[idx].dislikes || 0) + 1;
+  DB.set('products', products);
+  document.getElementById(`dislike-btn-${id}`).textContent = `👎 Dislike (${products[idx].dislikes})`;
+  document.getElementById(`dislike-btn-${id}`).classList.add('disliked');
+}
+function addComment(id) {
+  const input = document.getElementById(`comment-input-${id}`);
+  const text = input.value.trim();
+  if (!text) return;
+  const products = DB.get('products', []);
+  const idx = products.findIndex(p => p.id === id);
+  if (!products[idx].comments) products[idx].comments = [];
+  products[idx].comments.push({user: currentUser ? currentUser.name : 'Guest', text});
+  DB.set('products', products);
+  input.value = '';
+  toast('Comment posted!');
+  openProduct(id); // refresh
+}
+
+// ============================
+// CART
+// ============================
+function openCartModal() {
+  const el = document.getElementById('cart-items-list');
+  if (!cart.length) { el.innerHTML = '<p style="color:var(--muted);padding:20px 0">Your cart is empty.</p>'; }
+  else {
+    el.innerHTML = cart.map(item => `<div class="cart-item">
+      <div class="cart-item-img">${item.icon||'📦'}</div>
+      <div class="cart-item-info">
+        <div class="cart-item-name">${item.name}</div>
+        <div class="cart-item-price">৳${item.price} × ${item.qty||1} = ৳${item.price*(item.qty||1)}</div>
+      </div>
+      <button class="cart-item-remove" onclick="removeFromCart(${item.id})">✕</button>
+    </div>`).join('');
+  }
+  const total = cart.reduce((a,b) => a + b.price*(b.qty||1), 0);
+  document.getElementById('cart-total-price').textContent = `৳${total}`;
+  openOverlay('cart-overlay');
+}
+function removeFromCart(id) {
+  cart = cart.filter(x => x.id !== id);
+  updateCartBadge(); openCartModal();
+}
+
+// ============================
+// CHECKOUT
+// ============================
+function openCheckout() {
+  if (!cart.length) { toast('Cart is empty!', 'var(--danger)'); return; }
+  closeOverlay('cart-overlay'); openOverlay('checkout-overlay');
+}
+function selectPayment(el, method) {
+  selectedPayment = method;
+  document.querySelectorAll('.pay-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function confirmOrder() {
+  const division = document.getElementById('del-division').value;
+  const district = document.getElementById('del-district').value.trim();
+  const thana = document.getElementById('del-thana').value.trim();
+  const phone = document.getElementById('del-phone').value.trim();
+  if (!district || !thana || !phone) { toast('Please fill delivery details!', 'var(--danger)'); return; }
+  const orders = DB.get('orders', []);
+  const order = {
+    id: 'ORD-' + Date.now(),
+    date: new Date().toLocaleString(),
+    customer: currentUser ? currentUser.name : 'Guest',
+    email: currentUser ? currentUser.email : '',
+    items: [...cart],
+    total: cart.reduce((a,b) => a + b.price*(b.qty||1), 0),
+    payment: selectedPayment,
+    delivery: {division, district, thana, village: document.getElementById('del-village').value, house: document.getElementById('del-house').value, phone, map: document.getElementById('del-map').value}
+  };
+  orders.push(order); DB.set('orders', orders);
+  closeOverlay('checkout-overlay');
+  showInvoice(order);
+  cart = []; updateCartBadge();
+}
+function showInvoice(order) {
+  const html = `
+    <div class="invoice-header">
+      <h2>🎓 Student Park</h2>
+      <p style="color:var(--muted);font-size:.85rem">Academic Store | Dhaka, Bangladesh</p>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin:14px 0;font-size:.85rem">
+      <div><strong>Order ID:</strong> ${order.id}<br><strong>Date:</strong> ${order.date}</div>
+      <div style="text-align:right"><strong>Customer:</strong> ${order.customer}<br><strong>Payment:</strong> ${order.payment}</div>
+    </div>
+    <div style="font-size:.82rem;color:var(--muted);margin-bottom:12px">
+      📍 ${order.delivery.house}, ${order.delivery.village}, ${order.delivery.thana}, ${order.delivery.district}, ${order.delivery.division} | 📞 ${order.delivery.phone}
+    </div>
+    <table class="invoice-table">
+      <tr><th>Product</th><th>Qty</th><th>Unit</th><th>Total</th></tr>
+      ${order.items.map(i=>`<tr><td>${i.name}</td><td>${i.qty||1}</td><td>৳${i.price}</td><td>৳${i.price*(i.qty||1)}</td></tr>`).join('')}
+    </table>
+    <div class="invoice-total">Grand Total: ৳${order.total}</div>
+    <p style="font-size:.8rem;color:var(--muted);margin-top:12px;text-align:center">Estimated Delivery: 3–5 Business Days. Thank you for shopping with Student Park! 📚</p>
+  `;
+  document.getElementById('invoice-content').innerHTML = html;
+  openOverlay('invoice-overlay');
+  toast('Order placed! Invoice ready. 🎉');
+}
+function printInvoice() { window.print(); }
+function emailInvoice() { toast(`Invoice sent to ${currentUser ? currentUser.email : 'your email'}! 📧`); }
+
+// ============================
+// MESSAGING
+// ============================
+function openMessageModal() {
+  document.getElementById('msg-subtitle').textContent = currentUser ? `Chatting as ${currentUser.name}` : 'Guest chat';
+  renderMessages();
+  openOverlay('message-overlay');
+}
+function renderMessages() {
+  const msgs = DB.get('messages', []);
+  const el = document.getElementById('msg-list');
+  if (!msgs.length) { el.innerHTML = '<p style="color:var(--muted);font-size:.85rem;padding:10px 0">No messages yet. Say hello!</p>'; return; }
+  el.innerHTML = msgs.map(m => `<div>
+    ${m.type !== 'sent' ? `<div class="msg-name">${m.name}</div>` : ''}
+    <div class="msg-bubble ${m.type === 'sent' ? 'sent' : 'recv'}">
+      ${m.image ? `<img src="${m.image}" style="max-width:180px;border-radius:8px;display:block">` : ''}
+      ${m.voice ? `<span>🎤 Voice message</span>` : ''}
+      ${m.text ? m.text : ''}
+    </div>
+  </div>`).join('');
+  el.scrollTop = el.scrollHeight;
+}
+function sendMsg() {
+  const input = document.getElementById('msg-input');
+  const text = input.value.trim();
+  if (!text) return;
+  const msgs = DB.get('messages', []);
+  msgs.push({type:'sent', name: currentUser ? currentUser.name : 'Guest', text});
+  // simulate reply
+  setTimeout(() => {
+    const rmsgs = DB.get('messages', []);
+    rmsgs.push({type:'recv', name:'Store Support', text:'Thank you for your message! We will get back to you shortly. 📚'});
+    DB.set('messages', rmsgs); renderMessages();
+  }, 1000);
+  DB.set('messages', msgs);
+  input.value = ''; renderMessages();
+}
+function msgEnter(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); } }
+function sendImageMsg(input) {
+  if (!input.files || !input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const msgs = DB.get('messages', []);
+    msgs.push({type:'sent', name: currentUser ? currentUser.name : 'Guest', image: e.target.result});
+    DB.set('messages', msgs); renderMessages();
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+function sendVoiceMsg() {
+  const msgs = DB.get('messages', []);
+  msgs.push({type:'sent', name: currentUser ? currentUser.name : 'Guest', voice: true});
+  DB.set('messages', msgs); renderMessages();
+  toast('🎤 Voice message sent (demo)');
+}
+
+// ============================
+// ADMIN
+// ============================
+function showAdminPage() {
+  document.getElementById('landing').style.display = 'none';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('admin-page').style.display = 'block';
+  document.getElementById('admin-name').textContent = `👤 Admin`;
+  updateAdminStats(); renderAdminProducts();
+}
+function updateAdminStats() {
+  const products = DB.get('products', []);
+  const orders = DB.get('orders', []);
+  const revenue = orders.reduce((a,b) => a + (b.total||0), 0);
+  document.getElementById('stat-products').textContent = products.length;
+  document.getElementById('stat-orders').textContent = orders.length;
+  document.getElementById('stat-revenue').textContent = `৳${revenue}`;
+}
+function renderAdminProducts() {
+  const products = DB.get('products', []);
+  document.getElementById('admin-products-list').innerHTML = products.map(p => `
+    <div class="apt-row">
+      <div>${p.icon||'📦'} ${p.name}</div>
+      <div style="color:var(--accent2);font-family:'JetBrains Mono',monospace">৳${p.price}</div>
+      <div style="color:var(--muted);font-size:.82rem">${p.category.split('(')[0].trim()}</div>
+      <div><button class="btn btn-danger" style="padding:5px 10px;font-size:.78rem" onclick="quickDelete(${p.id})">Delete</button></div>
+    </div>
+  `).join('');
+}
+function quickDelete(id) {
+  if (!confirm('Delete this product?')) return;
+  let products = DB.get('products', []);
+  products = products.filter(p => p.id !== id);
+  DB.set('products', products); updateAdminStats(); renderAdminProducts(); toast('Product deleted!', 'var(--danger)');
+}
+
+// ADD PRODUCT
+function openAddProductModal() {
+  const sel = document.getElementById('np-category');
+  sel.innerHTML = CATEGORIES.map(c => `<option value="${c}">${c}</option>`).join('');
+  openOverlay('add-product-overlay');
+}
+function addProduct() {
+  const name = document.getElementById('np-name').value.trim();
+  const price = parseFloat(document.getElementById('np-price').value);
+  const desc = document.getElementById('np-desc').value.trim();
+  const category = document.getElementById('np-category').value;
+  const icon = document.getElementById('np-icon').value || '📦';
+  if (!name || !price || !category) { toast('Fill all required fields!', 'var(--danger)'); return; }
+  const products = DB.get('products', []);
+  let nid = DB.get('next-id', 100); nid++; DB.set('next-id', nid);
+  products.push({id: nid, name, price, desc, category, icon, ratings:[], comments:[], likes:0, dislikes:0});
+  DB.set('products', products);
+  closeOverlay('add-product-overlay');
+  updateAdminStats(); renderAdminProducts();
+  toast(`"${name}" added! ✅`);
+}
+function refreshAddProduct() {
+  ['np-name','np-price','np-desc','np-icon'].forEach(id => document.getElementById(id).value = id==='np-icon'?'📦':'');
+}
+
+// DELETE PRODUCTS
+function openDeleteModal() {
+  renderDeleteList();
+  openOverlay('delete-overlay');
+}
+function renderDeleteList() {
+  const products = DB.get('products', []);
+  document.getElementById('delete-products-list').innerHTML = products.map(p => `
+    <div class="delete-product-item">
+      <input type="checkbox" value="${p.id}" onchange="updateDeleteCount()">
+      <span>${p.icon||'📦'} <strong>${p.name}</strong> — ৳${p.price}</span>
+    </div>
+  `).join('');
+  updateDeleteCount();
+}
+function updateDeleteCount() {
+  const checked = document.querySelectorAll('#delete-products-list input[type=checkbox]:checked').length;
+  document.getElementById('selected-count').textContent = checked;
+}
+function clearSelection() {
+  document.querySelectorAll('#delete-products-list input[type=checkbox]').forEach(c => c.checked = false);
+  updateDeleteCount();
+}
+function deleteSelected() {
+  const checked = [...document.querySelectorAll('#delete-products-list input[type=checkbox]:checked')].map(c => parseInt(c.value));
+  if (!checked.length) { toast('No products selected!', 'var(--danger)'); return; }
+  let products = DB.get('products', []);
+  products = products.filter(p => !checked.includes(p.id));
+  DB.set('products', products);
+  renderDeleteList(); updateAdminStats(); renderAdminProducts();
+  toast(`${checked.length} product(s) deleted!`, 'var(--danger)');
+}
+
+// HISTORY
+function openHistoryModal() {
+  const orders = DB.get('orders', []);
+  const el = document.getElementById('history-list');
+  if (!orders.length) { el.innerHTML = '<p style="color:var(--muted)">No orders yet.</p>'; openOverlay('history-overlay'); return; }
+  el.innerHTML = [...orders].reverse().map(o => `<div class="history-item">
+    <div class="history-item-header">
+      <span class="order-id">${o.id}</span><span class="order-date">${o.date}</span>
+    </div>
+    <div class="history-customer">👤 ${o.customer} (${o.email})</div>
+    <div class="history-products">${o.items.map(i=>`${i.name} ×${i.qty||1}`).join(', ')}</div>
+    <div style="font-size:.82rem;color:var(--muted);margin-top:4px">💳 ${o.payment} | 📍 ${o.delivery.district}, ${o.delivery.division}</div>
+    <div class="history-total">৳${o.total}</div>
+  </div>`).join('');
+  openOverlay('history-overlay');
+}
+
+// ============================
+// INIT
+// ============================
+window.onload = function() {
+  document.getElementById('landing').style.display = 'flex';
+};
+</script>
+</body>
+</html>
